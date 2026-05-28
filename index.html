@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TileGraphAgent — Industrial 3D, made agent-readable</title>
+  <meta name="description"
+    content="TileGraphAgent converts industrial CAD/BIM models into 3D Tiles 1.1, preserves object identity, exports a Knowledge Graph, and exposes deterministic MCP tools for AI agents.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- ============================== NAV ============================== -->
+  <nav class="nav" id="nav">
+    <div class="wrap nav-inner">
+      <a href="#top" class="brand" aria-label="TileGraphAgent home">
+        <svg class="logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg" x1="0" y1="0" x2="40" y2="40">
+              <stop offset="0" stop-color="#38BDF8" />
+              <stop offset="1" stop-color="#22D3EE" />
+            </linearGradient>
+          </defs>
+          <!-- isometric tile / cube outline -->
+          <path d="M20 4 L34 12 L34 28 L20 36 L6 28 L6 12 Z" stroke="url(#lg)" stroke-width="1.6"
+            fill="rgba(56,189,248,0.06)" />
+          <path d="M20 4 L20 20 M20 20 L34 12 M20 20 L6 12" stroke="#22D3EE" stroke-width="1.2" opacity="0.5" />
+          <!-- graph nodes -->
+          <circle cx="20" cy="20" r="3" fill="#38BDF8" />
+          <circle cx="20" cy="4" r="2.4" fill="#A3E635" />
+          <circle cx="34" cy="28" r="2.4" fill="#22D3EE" />
+          <circle cx="6" cy="28" r="2.4" fill="#F59E0B" />
+          <path d="M20 20 L20 4 M20 20 L34 28 M20 20 L6 28" stroke="#A3E635" stroke-width="1" opacity="0.45" />
+        </svg>
+        <span class="wm"><b>Tile</b><span>Graph</span><b>Agent</b></span>
+      </a>
+      <div class="nav-links">
+        <a href="#problem">Problem</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#demo">Demo</a>
+        <a href="#mcp">MCP</a>
+        <a href="#viewer">Viewer</a>
+        <a href="#stack">Stack</a>
+      </div>
+      <div class="nav-cta">
+        <a href="https://github.com/tilegraphagent/tilegraphagent.github.io" class="btn btn-ghost btn-sm"
+          target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+            <path
+              d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.300000000000004-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3s1.7.1 2.5.3c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5C19.1 20.2 22 16.4 22 12c0-5.5-4.5-10-10-10z" />
+          </svg>
+          GitHub
+        </a>
+        <a href="#demo" class="btn btn-primary btn-sm">Watch Demo</a>
+      </div>
+    </div>
+  </nav>
+
+  <div id="top"></div>
+
+  <!-- ============================== HERO ============================== -->
+  <header class="hero" data-screen-label="Hero">
+    <div class="hero-glow"></div>
+    <div class="wrap">
+      <div class="hero-top reveal">
+        <span class="kicker">Industrial CAD → 3D Tiles 1.1 → Knowledge Graph → MCP Agent Bridge</span>
+        <h1>Industrial 3D,<br><span class="grad">made agent-readable.</span></h1>
+        <p class="hero-sub">TileGraphAgent converts industrial CAD/BIM-style models into optimized 3D Tiles 1.1,
+          preserves object identity, exports a Knowledge Graph, and exposes MCP tools so AI agents can query, reason,
+          highlight, isolate, and explain engineering systems with auditable evidence.</p>
+        <div class="hero-badges">
+          <span class="chip"><span class="dot"></span>Rust Pipeline</span>
+          <span class="chip"><span class="dot"></span>3D Tiles 1.1</span>
+          <span class="chip"><span class="dot"></span>glTF / GLB</span>
+          <span class="chip"><span class="dot"></span>Neo4j Knowledge Graph</span>
+          <span class="chip"><span class="dot"></span>MCP Server</span>
+          <span class="chip"><span class="dot"></span>CesiumJS Viewer</span>
+          <span class="chip"><span class="dot"></span>Spatial Index</span>
+          <span class="chip"><span class="dot"></span>Audit Logs</span>
+        </div>
+        <div class="hero-actions">
+          <a href="#architecture" class="btn btn-primary">View Architecture
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+          <a href="#demo" class="btn btn-ghost">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none" />
+            </svg>
+            Watch Demo Flow
+          </a>
+        </div>
+      </div>
+
+      <!-- split mockup -->
+      <div class="hero-mock reveal d1">
+        <!-- 3D viewport -->
+        <div class="viewport">
+          <div class="viewport-bar">
+            <span class="vdot"></span><span class="vdot"></span><span class="vdot"></span>
+            <span class="vtitle">cesium-viewer · area-a · tileset.json</span>
+            <span class="vmeta">SYS-COOLING · isolated</span>
+          </div>
+          <div class="viewport-stage">
+            <div class="viewport-floor"></div>
+            <svg class="plant-svg" viewBox="0 0 560 380" preserveAspectRatio="xMidYMid meet"
+              aria-label="Industrial plant 3D wireframe">
+              <!-- highlighted pipe line LINE-1001 -->
+              <g stroke-linecap="round" fill="none">
+                <path d="M70 250 H300 V150 H470" stroke="#38BDF8" stroke-width="5" opacity="0.95" />
+                <path d="M70 250 H300 V150 H470" stroke="#38BDF8" stroke-width="13" opacity="0.12" />
+                <!-- secondary piping -->
+                <path d="M150 250 V310 H400" stroke="#2a3c58" stroke-width="3" />
+                <path d="M300 150 V90 H200" stroke="#2a3c58" stroke-width="3" />
+              </g>
+              <!-- pumps -->
+              <g>
+                <rect x="120" y="232" width="40" height="36" rx="4" fill="#11233f" stroke="#38BDF8"
+                  stroke-width="1.6" />
+                <circle cx="140" cy="250" r="9" fill="none" stroke="#38BDF8" stroke-width="1.6" />
+                <rect x="270" y="232" width="40" height="36" rx="4" fill="#11233f" stroke="#38BDF8"
+                  stroke-width="1.6" />
+                <circle cx="290" cy="250" r="9" fill="none" stroke="#38BDF8" stroke-width="1.6" />
+              </g>
+              <!-- valves (amber) -->
+              <g fill="#F59E0B">
+                <path class="valve" d="M205 250 l9 -7 v14 z M205 250 l-9 -7 v14 z" />
+                <path class="valve" d="M300 195 l-7 -9 h14 z M300 195 l-7 9 h14 z" />
+                <path class="valve" d="M385 150 l9 -7 v14 z M385 150 l-9 -7 v14 z" />
+              </g>
+              <!-- equipment block -->
+              <rect x="440" y="120" width="56" height="60" rx="4" fill="#0f213c" stroke="#2a3c58" stroke-width="1.6" />
+              <line x1="440" y1="140" x2="496" y2="140" stroke="#2a3c58" />
+              <line x1="440" y1="160" x2="496" y2="160" stroke="#2a3c58" />
+            </svg>
+            <span class="idlabel cy" style="left:13%;top:48%">LINE-1001</span>
+            <span class="idlabel cy" style="left:18%;top:73%">P-1001</span>
+            <span class="idlabel cy" style="left:46%;top:73%">P-1002</span>
+            <span class="idlabel am" style="left:31%;top:60%">XV-1001A</span>
+            <span class="idlabel am" style="left:64%;top:31%">XV-1002A</span>
+            <span class="idlabel lm" style="left:79%;top:25%">EQ · cooling</span>
+          </div>
+        </div>
+
+        <!-- agent panel -->
+        <div class="agent">
+          <div class="agent-head">
+            <span class="pulse"></span>
+            <span class="t">agent_session_001 <span>· mcp/tools</span></span>
+          </div>
+          <div class="agent-body" id="agentBody">
+            <div class="tool-call"><span class="ix">01</span><span><span class="fn">search_object_by_tag</span>(<span
+                  class="arg">"LINE-1001"</span>)</span><span class="ok">✓</span></div>
+            <div class="tool-call"><span class="ix">02</span><span><span
+                  class="fn">query_connected_components</span>(object_id)</span><span class="ok">✓</span></div>
+            <div class="tool-call"><span class="ix">03</span><span><span
+                  class="fn">get_tile_feature_mapping</span>(objects)</span><span class="ok">✓</span></div>
+            <div class="tool-call"><span class="ix">04</span><span><span
+                  class="fn">isolate_system_in_viewer</span>(system_id)</span><span class="ok">✓</span></div>
+            <div class="tool-call"><span class="ix">05</span><span><span
+                  class="fn">generate_maintenance_context</span>(evidence)</span><span class="ok">✓</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- pipeline strip -->
+      <div class="pipeline-strip reveal d2" id="pipelineStrip">
+        <span class="pipe-step"><span class="n">CAD / IFC / Synthetic Plant</span></span>
+        <span class="pipe-arrow">→</span>
+        <span class="pipe-step">3D Tiles 1.1</span>
+        <span class="pipe-arrow">→</span>
+        <span class="pipe-step">Spatial Index</span>
+        <span class="pipe-arrow">→</span>
+        <span class="pipe-step">Knowledge Graph</span>
+        <span class="pipe-arrow">→</span>
+        <span class="pipe-step">MCP Tools</span>
+        <span class="pipe-arrow">→</span>
+        <span class="pipe-step"><span class="n">Agent + Viewer Actions</span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================== PROBLEM ============================== -->
+  <section id="problem" data-screen-label="Problem">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">The Problem</span>
+        <h2>Industrial 3D is not just triangles.</h2>
+        <p>Industrial models are heavy, messy, proprietary, and semantically rich. A pump is not just a mesh. A valve is
+          not just geometry. A pipe segment belongs to a line, appears in a P&amp;ID, connects to equipment, has
+          isolation logic, and must map back to visual features in the viewer. LLM agents cannot reason safely from
+          triangles alone.</p>
+      </div>
+      <div class="problem-grid">
+        <div class="reveal">
+          <p style="color:var(--fg-2);font-size:var(--fs-400);">They need deterministic access to:</p>
+          <div class="need-list">
+            <span class="need-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>stable object IDs</span>
+            <span class="need-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>engineering tags</span>
+            <span class="need-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>graph connectivity</span>
+            <span class="need-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>spatial proximity</span>
+            <span class="need-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>P&amp;ID references</span>
+            <span class="need-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>datasheets</span>
+            <span class="need-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>work packages</span>
+            <span class="need-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>tile &amp; feature mappings</span>
+            <span class="need-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>auditable tool results</span>
+          </div>
+        </div>
+        <div class="reveal d1">
+          <div class="card compare cmp-bad">
+            <h4><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--fg-3)" stroke-width="2">
+                <path d="M2 3h20v14H2z" />
+                <path d="M8 21h8M12 17v4" />
+              </svg> Traditional 3D Viewer</h4>
+            <div class="cmp-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M15 9l-6 6M9 9l6 6" />
+              </svg>renders geometry, selects meshes</div>
+            <div class="cmp-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M15 9l-6 6M9 9l6 6" />
+              </svg>shows raw properties only</div>
+            <div class="cmp-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M15 9l-6 6M9 9l6 6" />
+              </svg>disconnected from graph semantics</div>
+            <div class="cmp-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M15 9l-6 6M9 9l6 6" />
+              </svg>no deterministic agent interface</div>
+          </div>
+          <div class="card compare cmp-good">
+            <h4><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="2">
+                <path d="M12 2 2 7l10 5 10-5z" />
+                <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg> TileGraphAgent</h4>
+            <div class="cmp-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>preserves industrial object identity</div>
+            <div class="cmp-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>maps visual features to engineering objects</div>
+            <div class="cmp-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>exports semantic graph relationships</div>
+            <div class="cmp-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>provides MCP tools for agents</div>
+            <div class="cmp-row"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>logs every action for auditability</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== THESIS ============================== -->
+  <section class="alt" id="thesis" data-screen-label="Core thesis">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">Core Thesis</span>
+        <h2>A shared identity layer across 3D, graph, and agents.</h2>
+        <p>TileGraphAgent is built around one principle: every visual feature, graph node, spatial index record, and MCP
+          result must resolve to the same stable engineering object identity. This is what allows an AI agent to answer
+          engineering questions with evidence instead of hallucination.</p>
+      </div>
+      <div class="thesis-grid">
+        <div class="card identity-stack reveal">
+          <div class="code-head" style="margin:-24px -24px 16px;border-radius:0;">
+            <span class="fname">identity_stack</span><span class="lang">schema</span>
+          </div>
+          <div class="row"><span class="k">object_id</span><span class="v">obj_pump_p_1001</span></div>
+          <div class="row"><span class="k">tag</span><span class="v">P-1001</span></div>
+          <div class="row"><span class="k">source_id</span><span class="v">synth/area-a</span></div>
+          <div class="row"><span class="k">revision_id</span><span class="v">rev_004</span></div>
+          <div class="row"><span class="k">tile_id</span><span class="v">area-a-equipment</span></div>
+          <div class="row"><span class="k">feature_id</span><span class="v">1201</span></div>
+          <div class="row"><span class="k">gltf_node</span><span class="v">PUMP-P-1001</span></div>
+          <div class="row"><span class="k">global_transform</span><span class="v">mat4[16]</span></div>
+          <div class="row"><span class="k">aabb</span><span class="v">[min, max]</span></div>
+        </div>
+        <div class="card resolve reveal d1">
+          <div class="center-obj">Engineering Object</div>
+          <div class="branches">
+            <div class="resolve-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M12 2 2 7l10 5 10-5z" />
+                <path d="M2 17l10 5 10-5" />
+              </svg>glTF Node<span class="tag">geometry</span></div>
+            <div class="resolve-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+              </svg>3D Tiles Feature<span class="tag">feature_id</span></div>
+            <div class="resolve-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path
+                  d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              </svg>Spatial Index Record<span class="tag">aabb</span></div>
+            <div class="resolve-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <circle cx="5" cy="6" r="3" />
+                <circle cx="19" cy="6" r="3" />
+                <circle cx="12" cy="18" r="3" />
+                <path d="M5 9v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M12 13v2" />
+              </svg>Neo4j Graph Node<span class="tag">cypher</span></div>
+            <div class="resolve-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M4 4h16v16H4z" />
+                <path d="M9 9h6v6H9z" />
+              </svg>MCP Resource<span class="tag">uri</span></div>
+            <div class="resolve-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>Viewer Selection<span class="tag">highlight</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== ARCHITECTURE ============================== -->
+  <section id="architecture" data-screen-label="Architecture">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">Platform Architecture</span>
+        <h2>End-to-end industrial 3D × AI pipeline.</h2>
+        <p>Nine deterministic stages take a raw plant model from ingestion to agent-controlled viewer actions — each
+          stage produces inspectable, validated artifacts.</p>
+      </div>
+      <div class="arch-grid" id="archGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============================== DEMO ============================== -->
+  <section class="alt" id="demo" data-screen-label="Demo scenario">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">Demo Scenario</span>
+        <h2>Ask engineering questions. Get visual, graph-backed answers.</h2>
+      </div>
+      <div class="demo-q reveal">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        <span>Find all pumps connected to <b>LINE-1001</b>, show their isolation valves, isolate the affected system in
+          the viewer, and explain the maintenance impact.</span>
+      </div>
+      <div class="demo-grid">
+        <div class="timeline reveal" id="demoTimeline"></div>
+        <div class="demo-side reveal d1">
+          <div class="card resp-card">
+            <div class="rh"><span class="pulse"></span>agent_response · evidence-backed</div>
+            <p class="resp-line">LINE-1001 is connected to pumps <strong style="color:var(--accent)">P-1001</strong> and
+              <strong style="color:var(--accent)">P-1002</strong>.</p>
+            <div class="resp-block">
+              <div class="lbl">Isolation valves</div>
+              <ul>
+                <li><span class="tag">XV-1001A</span> upstream of P-1001</li>
+                <li><span class="tag">XV-1001B</span> downstream of P-1001</li>
+                <li><span class="tag">XV-1002A</span> upstream of P-1002</li>
+              </ul>
+            </div>
+            <div class="resp-block">
+              <div class="lbl">Viewer action</div>
+              <ul>
+                <li>Isolated <span style="color:var(--graph)">SYS-COOLING</span></li>
+                <li>Highlighted 2 pumps, 4 valves, 11 pipe segments</li>
+              </ul>
+            </div>
+            <div class="resp-block">
+              <div class="lbl">Maintenance impact</div>
+              <p class="resp-line" style="font-size:var(--fs-200);color:var(--fg-2)">Shutting down LINE-1001 affects the
+                cooling water loop in Area A.</p>
+            </div>
+            <div class="conf">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+                <path d="M12 9v4M12 17h.01" />
+              </svg>
+              <span><strong style="color:var(--amber)">Confidence: High</strong> for synthetic graph data. Real plant
+                validation required before operational use.</span>
+            </div>
+          </div>
+          <div class="code-card">
+            <div class="code-head"><span class="fname">audit_log.json</span><span class="lang">json</span></div>
+            <pre><span class="tok-pun">{</span>
+  <span class="tok-key">"session_id"</span>: <span class="tok-str">"agent_session_001"</span>,
+  <span class="tok-key">"tool"</span>: <span class="tok-str">"query_connected_components"</span>,
+  <span class="tok-key">"input"</span>: <span class="tok-pun">{</span> <span class="tok-key">"object_id"</span>: <span class="tok-str">"obj_line_1001"</span> <span class="tok-pun">}</span>,
+  <span class="tok-key">"output_count"</span>: <span class="tok-num">17</span>,
+  <span class="tok-key">"status"</span>: <span class="tok-str">"success"</span>,
+  <span class="tok-key">"timestamp"</span>: <span class="tok-str">"2026-05-29T10:32:18Z"</span>
+<span class="tok-pun">}</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== MCP ============================== -->
+  <section id="mcp" data-screen-label="MCP bridge">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">MCP Agent Bridge</span>
+        <h2>Deterministic tools for engineering agents.</h2>
+        <p>TileGraphAgent does not allow the LLM to guess engineering facts or directly manipulate the model. The agent
+          must use schema-bound MCP tools and return evidence from structured results.</p>
+      </div>
+      <div class="mcp-grid reveal" id="mcpGrid"></div>
+      <div class="card rules-card reveal d1">
+        <div class="rh">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <h4>Agent rules</h4>
+        </div>
+        <ul class="rules-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>Never infer facts without tool evidence.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>Always resolve tags to object IDs.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>Always distinguish connectivity from proximity.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>Never trigger viewer actions without object mappings.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>Always include uncertainty.</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>Always write audit-friendly answers.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== KNOWLEDGE GRAPH ============================== -->
+  <section class="alt" id="graph" data-screen-label="Knowledge graph">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">Knowledge Graph</span>
+        <h2>Engineering semantics beyond the mesh.</h2>
+        <p>The graph makes engineering relationships explicit, queryable, and inspectable by both humans and agents.</p>
+      </div>
+      <div class="graph-grid">
+        <div class="graph-viz reveal" id="graphViz">
+          <svg id="graphSvg" viewBox="0 0 560 480" preserveAspectRatio="xMidYMid meet"></svg>
+        </div>
+        <div class="graph-side reveal d1">
+          <div class="card rel-card">
+            <h4>Relationship examples</h4>
+            <div class="rel-line"><span class="nA">Pump</span><span class="rel">PART_OF</span><span
+                class="nB">System</span></div>
+            <div class="rel-line"><span class="nA">Valve</span><span class="rel">CONNECTED_TO</span><span
+                class="nB">PipeSegment</span></div>
+            <div class="rel-line"><span class="nA">Line</span><span class="rel">APPEARS_IN_PID</span><span
+                class="nB">PID</span></div>
+            <div class="rel-line"><span class="nA">Pump</span><span class="rel">HAS_DATASHEET</span><span
+                class="nB">Datasheet</span></div>
+            <div class="rel-line"><span class="nA">Feature</span><span class="rel">MAPS_TO</span><span
+                class="nB">Object</span></div>
+            <div class="rel-line"><span class="nA">Object</span><span class="rel">HAS_BOUNDING_VOLUME</span><span
+                class="nB">AABB</span></div>
+            <div class="rel-line"><span class="nA">Valve</span><span class="rel">ISOLATED_BY</span><span
+                class="nB">Line</span></div>
+            <div class="rel-line"><span class="nA">Issue</span><span class="rel">AFFECTS</span><span
+                class="nB">Equipment</span></div>
+          </div>
+          <div class="code-card">
+            <div class="code-head"><span class="fname">isolation_query.cypher</span><span class="lang">cypher</span>
+            </div>
+            <pre><span class="tok-key">MATCH</span> (line:<span class="tok-fn">Line</span> {tag: <span class="tok-str">"LINE-1001"</span>})-[:CONNECTED_TO*<span class="tok-num">1</span>..<span class="tok-num">4</span>]-(pump:<span class="tok-fn">Pump</span>)
+<span class="tok-key">OPTIONAL MATCH</span> (pump)-[:ISOLATED_BY]-(valve:<span class="tok-fn">Valve</span>)
+<span class="tok-key">RETURN</span> line.tag, pump.tag,
+       <span class="tok-fn">collect</span>(valve.tag) <span class="tok-key">AS</span> isolation_valves;</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== TILES MAPPING ============================== -->
+  <section id="tiles" data-screen-label="3D Tiles mapping">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">3D Tiles + glTF Identity Mapping</span>
+        <h2>Every visible feature maps back to an engineering object.</h2>
+        <p>TileGraphAgent uses 3D Tiles for scalable streaming, glTF/GLB for optimized geometry, and metadata mapping
+          files to preserve the link between visual content and engineering semantics.</p>
+      </div>
+      <div class="tiles-grid">
+        <div class="code-card reveal">
+          <div class="code-head"><span class="fname">gltf_node.extras</span><span class="lang">json</span></div>
+          <pre><span class="tok-pun">{</span>
+  <span class="tok-key">"name"</span>: <span class="tok-str">"PUMP-P-1001"</span>,
+  <span class="tok-key">"extras"</span>: <span class="tok-pun">{</span>
+    <span class="tok-key">"object_id"</span>: <span class="tok-str">"obj_pump_p_1001"</span>,
+    <span class="tok-key">"tag"</span>: <span class="tok-str">"P-1001"</span>,
+    <span class="tok-key">"class"</span>: <span class="tok-str">"Pump"</span>,
+    <span class="tok-key">"system"</span>: <span class="tok-str">"SYS-COOLING"</span>,
+    <span class="tok-key">"line_refs"</span>: [<span class="tok-str">"LINE-1001"</span>],
+    <span class="tok-key">"feature_id"</span>: <span class="tok-num">1201</span>
+  <span class="tok-pun">}</span>
+<span class="tok-pun">}</span></pre>
+        </div>
+        <div class="card tree reveal d1">
+          <div class="code-head" style="margin:-20px -20px 16px;border-radius:0;"><span
+              class="fname">output/tiles/</span><span class="lang">tree</span></div>
+          <div><span class="dir">tileset.json</span></div>
+          <div><span class="dir">content/</span></div>
+          <div><span class="ind">&nbsp;&nbsp;</span><span class="file">area-a-root.glb</span></div>
+          <div><span class="ind">&nbsp;&nbsp;</span><span class="file">area-a-piping.glb</span></div>
+          <div><span class="ind">&nbsp;&nbsp;</span><span class="file">area-a-equipment.glb</span></div>
+          <div><span class="dir">metadata/</span></div>
+          <div><span class="ind">&nbsp;&nbsp;</span><span class="file">feature_table.json</span></div>
+          <div><span class="ind">&nbsp;&nbsp;</span><span class="file">object_properties.json</span></div>
+          <div><span class="ind">&nbsp;&nbsp;</span><span class="hl">tile_feature_map.json</span></div>
+          <div><span class="dir">index/</span></div>
+          <div><span class="ind">&nbsp;&nbsp;</span><span class="hl">spatial_index.json</span></div>
+          <div><span class="dir">reports/</span></div>
+          <div><span class="ind">&nbsp;&nbsp;</span><span class="file">validation_report.json</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== VIEWER ============================== -->
+  <section class="alt" id="viewer" data-screen-label="CesiumJS viewer">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">CesiumJS Viewer</span>
+        <h2>Agent-controlled 3D viewer actions.</h2>
+        <p>The viewer is not just a display surface. It becomes the visual execution layer for deterministic agent
+          actions.</p>
+      </div>
+      <div class="viewer-grid">
+        <div class="reveal">
+          <div class="vfeat-grid" id="viewerFeatures"></div>
+        </div>
+        <div class="code-card reveal d1">
+          <div class="code-head"><span class="fname">ws://viewer · command</span><span class="lang">json</span></div>
+          <pre><span class="tok-pun">{</span>
+  <span class="tok-key">"type"</span>: <span class="tok-str">"highlight_objects"</span>,
+  <span class="tok-key">"session_id"</span>: <span class="tok-str">"agent_session_001"</span>,
+  <span class="tok-key">"objects"</span>: [
+    <span class="tok-pun">{</span>
+      <span class="tok-key">"object_id"</span>: <span class="tok-str">"obj_pump_p_1001"</span>,
+      <span class="tok-key">"feature_id"</span>: <span class="tok-num">1201</span>,
+      <span class="tok-key">"color"</span>: <span class="tok-str">"#38BDF8"</span>
+    <span class="tok-pun">}</span>,
+    <span class="tok-pun">{</span>
+      <span class="tok-key">"object_id"</span>: <span class="tok-str">"obj_valve_xv_1001a"</span>,
+      <span class="tok-key">"feature_id"</span>: <span class="tok-num">1407</span>,
+      <span class="tok-key">"color"</span>: <span class="tok-str">"#F59E0B"</span>
+    <span class="tok-pun">}</span>
+  ]
+<span class="tok-pun">}</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== STACK ============================== -->
+  <section id="stack" data-screen-label="Technical stack">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">Technical Stack</span>
+        <h2>Built with production-relevant engineering tools.</h2>
+      </div>
+      <div class="stack-grid reveal" id="stackGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============================== VALIDATION ============================== -->
+  <section class="alt" id="validation" data-screen-label="Validation">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">Validation &amp; Correctness</span>
+        <h2>Built for correctness, not demo magic.</h2>
+        <p>Industrial agent systems must be verifiable. TileGraphAgent includes validation across geometry, graph,
+          tiles, MCP schemas, and viewer mappings.</p>
+      </div>
+      <div class="valid-grid">
+        <div class="check-list reveal" id="checkList"></div>
+        <div class="code-card reveal d1">
+          <div class="code-head"><span class="fname">validation_report.json</span><span class="lang">json</span></div>
+          <pre><span class="tok-pun">{</span>
+  <span class="tok-key">"objects_total"</span>: <span class="tok-num">168</span>,
+  <span class="tok-key">"tags_unique"</span>: <span class="tok-key">true</span>,
+  <span class="tok-key">"missing_geometry"</span>: <span class="tok-num">0</span>,
+  <span class="tok-key">"missing_graph_nodes"</span>: <span class="tok-num">0</span>,
+  <span class="tok-key">"missing_tile_mappings"</span>: <span class="tok-num">0</span>,
+  <span class="tok-key">"invalid_bounding_volumes"</span>: <span class="tok-num">0</span>,
+  <span class="tok-key">"status"</span>: <span class="tok-str">"pass"</span>
+<span class="tok-pun">}</span></pre>
+          <div
+            style="padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px;font-family:var(--font-mono);font-size:var(--fs-200);color:var(--success)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+            All checks passed · 168 objects
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== PORTFOLIO ============================== -->
+  <section id="portfolio" data-screen-label="Portfolio credibility">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <span class="kicker">Engineering Credibility</span>
+        <h2>Designed to demonstrate real industrial 3D platform skills.</h2>
+      </div>
+      <div class="reveal d1" style="overflow-x:auto;">
+        <table class="ptable">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>TileGraphAgent evidence</th>
+            </tr>
+          </thead>
+          <tbody id="portfolioBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== CTA ============================== -->
+  <section class="cta" id="cta" data-screen-label="CTA">
+    <div class="cta-glow"></div>
+    <div class="wrap">
+      <div class="cta-inner reveal">
+        <span class="kicker" style="justify-content:center">Get Started</span>
+        <h2 style="margin-top:16px">Explore the architecture behind agentic industrial 3D.</h2>
+        <p>TileGraphAgent bridges geometry, graph semantics, and AI agents — turning industrial 3D models into
+          queryable, auditable engineering systems.</p>
+        <div class="cta-actions">
+          <a href="/docs/architecture" class="btn btn-primary">Read the Technical Plan
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+          <a href="/demo" class="btn btn-ghost">View Demo Scenario</a>
+          <a href="https://github.com/tilegraphagent/tilegraphagent.github.io" class="btn btn-ghost" target="_blank"
+            rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+              <path
+                d="M12 2C6.5 2 2 6.5 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.5-.3s1.7.1 2.5.3c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.3 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5C19.1 20.2 22 16.4 22 12c0-5.5-4.5-10-10-10z" />
+            </svg>
+            Open GitHub Repository
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== FOOTER ============================== -->
+  <footer data-screen-label="Footer">
+    <div class="wrap foot-inner">
+      <div class="foot-brand">
+        <div class="brand">
+          <svg class="logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M20 4 L34 12 L34 28 L20 36 L6 28 L6 12 Z" stroke="url(#lg)" stroke-width="1.6"
+              fill="rgba(56,189,248,0.06)" />
+            <circle cx="20" cy="20" r="3" fill="#38BDF8" />
+            <circle cx="20" cy="4" r="2.4" fill="#A3E635" />
+            <circle cx="34" cy="28" r="2.4" fill="#22D3EE" />
+            <circle cx="6" cy="28" r="2.4" fill="#F59E0B" />
+            <path d="M20 20 L20 4 M20 20 L34 28 M20 20 L6 28" stroke="#A3E635" stroke-width="1" opacity="0.45" />
+          </svg>
+          <span class="wm"><b>Tile</b><span style="color:var(--accent)">Graph</span><b>Agent</b></span>
+        </div>
+        <div class="tagline">Industrial CAD → 3D Tiles → Knowledge Graph → MCP Agent Bridge</div>
+        <p>Built for industrial 3D, agentic CAD, digital twin, and engineering AI workflows.</p>
+      </div>
+      <div class="foot-meta">
+        <div><a href="/docs/architecture">Architecture</a> · <a href="/demo">Demo</a></div>
+        <div style="margin-top:8px"><a href="https://github.com/tilegraphagent/tilegraphagent.github.io" target="_blank"
+            rel="noopener">github.com/tilegraphagent</a></div>
+        <div style="margin-top:16px;color:var(--fg-3)">© 2026 TileGraphAgent · Synthetic data for demonstration</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
